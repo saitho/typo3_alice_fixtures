@@ -61,12 +61,6 @@ final class Loader implements LoaderInterface
         return $this->loadFixtures($loader, $fixtureFiles);
     }
 
-    /**
-     * @param AliceDataFixturesLoaderInterface|PersisterAwareInterface $loader
-     * @param string[] $files
-     *
-     * @return object[]
-     */
     protected function loadFixtures(AliceDataFixturesLoaderInterface $loader, array $files): array
     {
         return $loader->load($files, [], []);
