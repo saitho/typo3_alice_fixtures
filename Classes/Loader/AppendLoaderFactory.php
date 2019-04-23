@@ -22,9 +22,6 @@ use Fidry\AliceDataFixtures\ProcessorInterface;
 use Nelmio\Alice\Loader\NativeLoader;
 use Ssch\Typo3AliceFixtures\Persister\DataHandlerPersister;
 use Ssch\Typo3AliceFixtures\Processors\FileProcessor;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Extbase\Object\ObjectManagerInterface;
 
 final class AppendLoaderFactory implements LoaderFactoryInterface
 {
@@ -34,9 +31,15 @@ final class AppendLoaderFactory implements LoaderFactoryInterface
      */
     private $processors = [];
 
-    public function __construct(FileProcessor $fileProcessor)
+    /**
+     * @var DataHandlerPersister
+     */
+    private $persister;
+
+    public function __construct(FileProcessor $fileProcessor, DataHandlerPersister $persister)
     {
         $this->processors[] = $fileProcessor;
+        $this->persister = $persister;
     }
 
     public function createLoader(): \Fidry\AliceDataFixtures\LoaderInterface
@@ -45,17 +48,9 @@ final class AppendLoaderFactory implements LoaderFactoryInterface
             new SimpleLoader(
                 new NativeLoader()
             ),
-            self::getObjectManager()->get(DataHandlerPersister::class),
+            $this->persister,
             null,
             $this->processors
         );
-    }
-
-    /**
-     * @return object|ObjectManager
-     */
-    private static function getObjectManager(): ObjectManagerInterface
-    {
-        return GeneralUtility::makeInstance(ObjectManager::class);
     }
 }

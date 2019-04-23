@@ -26,15 +26,15 @@ trait DataHandlerObjectTrait
     {
         // Prepare relations either simple or mm, 1-n etc.
         if (is_array($value)) {
-            $uids = [];
+            $ids = [];
             foreach ($value as $item) {
                 if ($item instanceof DataHandlerObjectInterface) {
-                    $uids[] = $item->getUid();
+                    $ids[] = $item->getUid();
                 }
             }
 
-            if (! empty($uids)) {
-                $value = implode(',', $uids);
+            if (! empty($ids)) {
+                $value = implode(',', $ids);
             }
         } elseif ($value instanceof DataHandlerObjectInterface) {
             $value = $value->getUid();
