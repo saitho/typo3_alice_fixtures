@@ -1,0 +1,67 @@
+{
+  "name": "ssch/typo3-alice-fixtures",
+  "type": "typo3-cms-extension",
+  "description": "Use alice fixtures in TYPO3 context",
+  "version": "2.0.0",
+  "license": "GPL-2.0+",
+  "homepage": "http://www.schreibersebastian.de",
+  "keywords": [
+    "alice",
+    "fixtures"
+  ],
+  "authors": [
+    {
+      "name": "Sebastian Schreiber",
+      "email": "breakpoint@schreibersebastian.de",
+      "role": "Developer",
+      "homepage": "http://www.schreibersebastian.de"
+    }
+  ],
+  "require": {
+    "php": "^7.1",
+    "theofidry/alice-data-fixtures": "^1.1",
+    "typo3/cms-core": "^8.7.13|| ^9.5.0"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^2.0",
+    "nimut/testing-framework": "^1.0 || ^2.0 || ^3.0 || ^4.0"
+  },
+  "replace": {
+    "typo3_alice_fixtures": "self.version",
+    "typo3-ter/typo3-alice-fixtures": "self.version"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ssch\\Typo3AliceFixtures\\": "Classes"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Ssch\\Typo3AliceFixtures\\Tests\\": "Tests"
+    }
+  },
+  "config": {
+    "vendor-dir": ".Build/vendor",
+    "bin-dir": ".Build/bin",
+    "preferred-install": {
+      "typo3/cms": "source",
+      "typo3/cms-core": "source",
+      "*": "dist"
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "mkdir -p .Build/Web/typo3conf/ext/",
+      "[ -L .Build/Web/typo3conf/ext/typo3_alice_fixtures ] || ln -snvf ../../../../. .Build/Web/typo3conf/ext/typo3_alice_fixtures"
+    ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev"
+    },
+    "typo3/cms": {
+      "cms-package-dir": "{$vendor-dir}/typo3/cms",
+      "web-dir": ".Build/Web"
+    }
+  }
+}
