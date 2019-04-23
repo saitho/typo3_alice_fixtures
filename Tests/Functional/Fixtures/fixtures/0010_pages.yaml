@@ -1,0 +1,17 @@
+\Ssch\Typo3AliceFixtures\Domain\Model\Page:
+  rootPage:
+    doktype: 1
+    title: RootPage
+    pid: 0
+    hidden: 0
+    is_siteroot: 1
+  page_level1_{1..10}:
+    pid: '@rootPage'
+    title: <word()>
+    hidden: 0
+    doktype: 1
+  page_level2_{1..3}:
+    pid: '@page_level1_1'
+    hidden: 0
+    title: <word()>
+    doktype: 1

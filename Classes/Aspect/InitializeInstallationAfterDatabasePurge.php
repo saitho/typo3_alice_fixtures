@@ -16,8 +16,8 @@ namespace Ssch\Typo3AliceFixtures\Aspect;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Exception;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-use TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException;
 use TYPO3\CMS\Extensionmanager\Utility\InstallUtility;
 
 final class InitializeInstallationAfterDatabasePurge
@@ -36,7 +36,7 @@ final class InitializeInstallationAfterDatabasePurge
     {
         try {
             $this->installUtility->install(...ExtensionManagementUtility::getLoadedExtensionListArray());
-        } catch (ExtensionManagerException $e) {
+        } catch (Exception $e) {
         }
     }
 }

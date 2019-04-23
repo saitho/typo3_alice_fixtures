@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Ssch\Typo3AliceFixtures\Integration;
 
@@ -16,12 +16,17 @@ namespace Ssch\Typo3AliceFixtures\Integration;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Exception;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility as Typo3ExtensionManagementUtility;
 
 final class ExtensionManagementUtility implements ExtensionManagementUtilityInterface
 {
     public function getLoadedExtensionList(): array
     {
-        return Typo3ExtensionManagementUtility::getLoadedExtensionListArray();
+        try {
+            return Typo3ExtensionManagementUtility::getLoadedExtensionListArray();
+        } catch (Exception $e) {
+            return [];
+        }
     }
 }

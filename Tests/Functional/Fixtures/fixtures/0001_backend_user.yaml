@@ -1,0 +1,7 @@
+\Ssch\Typo3AliceFixtures\Domain\Model\BackendUser:
+  user_{1..1}:
+    admin: 1
+    disable: 0
+    password: 'test'
+    username: 'test'
+    pid: 0

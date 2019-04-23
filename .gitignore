@@ -6,3 +6,4 @@ composer.lock
 Resources/
 TODO.md
 phpunit.xml
+functional.sh

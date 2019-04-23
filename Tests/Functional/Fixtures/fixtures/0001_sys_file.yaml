@@ -1,0 +1,10 @@
+\Ssch\Typo3AliceFixtures\Domain\Model\File:
+  file_{1..2}:
+    identifier: <image()>
+    pid: 0
+
+
+\Ssch\Typo3AliceFixtures\Domain\Model\FileReference:
+  image_reference_{1..2}:
+    uid_local: '@file_*'
+    pid: 0

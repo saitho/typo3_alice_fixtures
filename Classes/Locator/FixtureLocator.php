@@ -33,13 +33,13 @@ final class FixtureLocator implements FixtureLocatorInterface
      */
     private $fixturePaths = [];
 
-    public function __construct(string $rootDirectory = null)
+    public function __construct(string $rootDirectory = null, array $fixturePaths = null)
     {
         if (! is_string($rootDirectory) || ! is_dir($rootDirectory)) {
             $rootDirectory = Environment::getProjectPath();
         }
 
-        $this->fixturePaths = ['fixtures'];
+        $this->fixturePaths = $fixturePaths ?: ['fixtures'];
         $this->rootDirectory = $rootDirectory;
     }
 

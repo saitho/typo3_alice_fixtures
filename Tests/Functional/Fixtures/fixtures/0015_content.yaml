@@ -1,0 +1,9 @@
+\Ssch\Typo3AliceFixtures\Domain\Model\Content:
+  content_{1..3}:
+    pid: '@page_level1_1'
+    hidden: 0
+    header: <word()>
+    bodytext: <text(200)>
+    CType: 'textpic'
+    categories: ['@category_level1_*']
+    image: ['@image_reference_*']

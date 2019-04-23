@@ -1,0 +1,9 @@
+\Ssch\Typo3AliceFixtures\Domain\Model\Category:
+  rootCategory:
+    title: Root Category
+    pid: 0
+  category_level1_{1..10}:
+    pid: 0
+    parent: '@rootCategory'
+    title: <word()>
+    hidden: 0
