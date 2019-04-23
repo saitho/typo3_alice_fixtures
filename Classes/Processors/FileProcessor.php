@@ -36,8 +36,9 @@ final class FileProcessor implements ProcessorInterface
             $storage = $this->storageRepository->findByUid($object->getStorage());
             if ($storage) {
                 $file = $storage->addFile($object->getIdentifier(), $storage->getDefaultFolder());
+
                 $object->reset();
-                $object->uid = $file->getProperty('uid');
+                $object->__set('uid', $file->getProperty('uid'));
             }
         }
     }
