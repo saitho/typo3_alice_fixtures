@@ -30,7 +30,7 @@ final class Extension implements ExtensionInterface
         $this->name = $name;
     }
 
-    public static function createFromString($name): Extension
+    public static function createFromName($name): Extension
     {
         return new static($name);
     }

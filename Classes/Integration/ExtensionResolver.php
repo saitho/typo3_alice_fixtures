@@ -20,6 +20,20 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 final class ExtensionResolver implements ExtensionResolverInterface
 {
+    /**
+     * @var ExtensionManagementUtilityInterface
+     */
+    private $extensionManagementUtility;
+
+    /**
+     * ExtensionResolver constructor.
+     *
+     * @param ExtensionManagementUtilityInterface $extensionManagementUtility
+     */
+    public function __construct(ExtensionManagementUtilityInterface $extensionManagementUtility)
+    {
+        $this->extensionManagementUtility = $extensionManagementUtility;
+    }
 
     /**
      * @param array $names
@@ -28,14 +42,14 @@ final class ExtensionResolver implements ExtensionResolverInterface
      */
     public function resolveExtensions(array $names): array
     {
-        $loadedExtensions = ExtensionManagementUtility::getLoadedExtensionListArray();
+        $loadedExtensions = $this->extensionManagementUtility->getLoadedExtensionList();
 
         $result = [];
         foreach ($names as $name) {
-            if (!in_array($name, $loadedExtensions, true)) {
+            if (! in_array($name, $loadedExtensions, true)) {
                 throw ExtensionNotFoundException::create($name, $loadedExtensions);
             }
-            $result[$name] = Extension::createFromString($name);
+            $result[$name] = Extension::createFromName($name);
         }
 
         return array_values($result);
