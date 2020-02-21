@@ -20,8 +20,19 @@ final class Session implements DataHandlerObjectInterface
 {
     use DataHandlerObjectTrait;
 
+    const TABLE_NAME = 'be_sessions';
+
     public function getTableName(): string
     {
-        return 'be_sessions';
+        return self::TABLE_NAME;
+    }
+
+    public function getUid()
+    {
+        if (! isset($this->data['ses_id'])) {
+            $this->data['ses_id'] = md5(time() + rand());
+        }
+
+        return $this->data['ses_id'];
     }
 }
