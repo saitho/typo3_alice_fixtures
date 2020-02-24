@@ -20,7 +20,8 @@ use Fidry\AliceDataFixtures\Persistence\PersisterInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Ssch\Typo3AliceFixtures\Domain\Model\DataHandlerObjectInterface;
-use Ssch\Typo3AliceFixtures\Domain\Model\File;
+use Ssch\Typo3AliceFixtures\Domain\Model\FileReference;
+use Ssch\Typo3AliceFixtures\Processors\FileProcessor;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use UnexpectedValueException;
 
@@ -36,6 +37,11 @@ final class DataHandlerPersister implements PersisterInterface
      * @var array
      */
     private $dataMap = [];
+
+    /**
+     * @var FileReference[] File references have to be processed after flush happened as IDs need to be available
+     */
+    private $fileReferenceQueue = [];
 
     /**
      * @var LoggerInterface
@@ -55,6 +61,14 @@ final class DataHandlerPersister implements PersisterInterface
     {
         if (! $object instanceof DataHandlerObjectInterface) {
             throw new UnexpectedValueException('Must be of type DataHandlerObjectInterface');
+        }
+
+        /**
+         * Process file references the required all ids are created
+         */
+        if ($object instanceof FileReference) {
+            $this->fileReferenceQueue[] = $object;
+            return;
         }
 
         $this->dataMap[$object->getTableName()][$object->getUid()] = $object->toArray();
@@ -77,5 +91,37 @@ final class DataHandlerPersister implements PersisterInterface
 
             $this->dataMap = [];
         }
+
+        // Process file references
+        if (count($this->fileReferenceQueue)) {
+            $newDataMap = [];
+            /** @var DataHandlerObjectInterface $object */
+            foreach ($this->fileReferenceQueue as $object) {
+                $object = $this->replacePlaceholderIds($object, ['uid_foreign', 'uid_local']);
+                $newDataMap[$object->getTableName()][$object->getUid()] = $object->toArray();
+            }
+            $this->dataHandler->start($newDataMap, []);
+            $this->dataHandler->process_datamap();
+            $this->fileReferenceQueue = [];
+        }
+    }
+
+    protected function replacePlaceholderIds(DataHandlerObjectInterface $object, array $columnNames) {
+        /**
+         * Substitution array consists of the mapping done by FileProcessor and the mapping done by DataHandler
+         */
+        $substArray = array_merge(FileProcessor::getSubstitutionArray(), $this->dataHandler->substNEWwithIDs);
+
+        $data = $object->toArray();
+        foreach ($columnNames as $columnName) {
+            if (!array_key_exists($columnName, $data)) {
+                continue;
+            }
+            $columnValue = $data[$columnName];
+            if (array_key_exists($columnValue, $substArray)) {
+                $object->__set($columnName, $substArray[$columnValue]);
+            }
+        }
+        return $object;
     }
 }
