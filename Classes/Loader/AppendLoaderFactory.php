@@ -36,8 +36,7 @@ final class AppendLoaderFactory implements LoaderFactoryInterface
      */
     private $persister;
 
-    public function __construct(FileProcessor $fileProcessor, DataHandlerPersister $persister)
-    {
+    public function __construct(FileProcessor $fileProcessor, DataHandlerPersister $persister) {
         $this->processors[] = $fileProcessor;
         $this->persister = $persister;
     }

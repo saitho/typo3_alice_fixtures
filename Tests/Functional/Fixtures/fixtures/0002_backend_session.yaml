@@ -1,0 +1,4 @@
+\Ssch\Typo3AliceFixtures\Domain\Model\Session:
+  session_user1:
+    ses_id: '886526ce72b86870739cc41991144ec1'
+    ses_userid: '@user_1'

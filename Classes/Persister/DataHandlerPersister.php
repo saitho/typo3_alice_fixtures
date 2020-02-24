@@ -22,7 +22,10 @@ use Psr\Log\NullLogger;
 use Ssch\Typo3AliceFixtures\Domain\Model\DataHandlerObjectInterface;
 use Ssch\Typo3AliceFixtures\Domain\Model\FileReference;
 use Ssch\Typo3AliceFixtures\Processors\FileProcessor;
+use Ssch\Typo3AliceFixtures\Domain\Model\Session;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Session\Backend\DatabaseSessionBackend;
+use TYPO3\CMS\Core\Session\Backend\Exception\SessionNotCreatedException;
 use UnexpectedValueException;
 
 final class DataHandlerPersister implements PersisterInterface
@@ -39,6 +42,16 @@ final class DataHandlerPersister implements PersisterInterface
     private $dataMap = [];
 
     /**
+     * @var DatabaseSessionBackend
+     */
+    private $databaseSessionBackend;
+
+    /**
+     * @var Session[] Backend sessions are processed after flush happened as IDs need to be available
+     */
+    private $backendSessionsQueue = [];
+
+    /**
      * @var FileReference[] File references have to be processed after flush happened as IDs need to be available
      */
     private $fileReferenceQueue = [];
@@ -48,9 +61,13 @@ final class DataHandlerPersister implements PersisterInterface
      */
     private $logger;
 
-    public function __construct(DataHandler $dataHandler, LoggerInterface $logger = null)
-    {
+    public function __construct(
+        DataHandler $dataHandler,
+        DatabaseSessionBackend $databaseSessionBackend,
+        LoggerInterface $logger = null
+    ) {
         $this->dataHandler = $dataHandler;
+        $this->databaseSessionBackend = $databaseSessionBackend;
         $this->logger = $logger ?: new NullLogger();
     }
 
@@ -63,11 +80,13 @@ final class DataHandlerPersister implements PersisterInterface
             throw new UnexpectedValueException('Must be of type DataHandlerObjectInterface');
         }
 
-        /**
-         * Process file references the required all ids are created
-         */
         if ($object instanceof FileReference) {
+            // Process file references the required all ids are created
             $this->fileReferenceQueue[] = $object;
+            return;
+        } else if ($object instanceof Session) {
+            // Add backend sessions to queue as they are persisted after flush happened
+            $this->backendSessionsQueue[] = $object;
             return;
         }
 
@@ -103,6 +122,30 @@ final class DataHandlerPersister implements PersisterInterface
             $this->dataHandler->start($newDataMap, []);
             $this->dataHandler->process_datamap();
             $this->fileReferenceQueue = [];
+        }
+
+        // Process backend sessions
+        if (count($this->backendSessionsQueue)) {
+            $this->databaseSessionBackend->initialize('default', ['table' => Session::TABLE_NAME]);
+            foreach ($this->backendSessionsQueue as $object) {
+                $object = $this->replacePlaceholderIds($object, ['ses_userid']);
+                // Default values from typo3/testing-framework package
+                $data = array_merge(
+                    [
+                        'ses_iplock' => '[DISABLED]',
+                        'ses_backuserid' => 0,
+                        'ses_data' => '',
+                        'ses_tstamp' => 1777777777
+                    ],
+                    $object->toArray()
+                );
+
+                try {
+                    $this->databaseSessionBackend->set($object->getUid(), $data);
+                } catch (SessionNotCreatedException $error) {
+                    $this->logger->error($error);
+                }
+            }
         }
     }
 
