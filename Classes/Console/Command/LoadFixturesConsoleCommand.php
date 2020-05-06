@@ -17,6 +17,7 @@ namespace Ssch\Typo3AliceFixtures\Console\Command;
  */
 
 use Ssch\Typo3AliceFixtures\Loader\LoaderInterface;
+use Ssch\Typo3AliceFixtures\Locator\FixtureLocatorInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -37,10 +38,6 @@ final class LoadFixturesConsoleCommand extends Command
 
     public function __construct(string $name = null, LoaderInterface $loader = null)
     {
-        if (! $loader instanceof LoaderInterface) {
-            $loader = self::getObjectManager()->get(LoaderInterface::class);
-        }
-
         $this->loader = $loader;
         parent::__construct($name);
     }
@@ -60,6 +57,12 @@ final class LoadFixturesConsoleCommand extends Command
                 'Extensions where fixtures should be loaded.'
             )
             ->addOption(
+                'fixture-paths',
+                'p',
+                InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+                'Folders inside extensions private resources where fixtures are loaded.'
+            )
+            ->addOption(
                 'append',
                 null,
                 InputOption::VALUE_NONE,
@@ -67,13 +70,19 @@ final class LoadFixturesConsoleCommand extends Command
             );
     }
 
+    protected function initializeLoader(array $fixturePaths = null): LoaderInterface {
+        if (! $this->loader instanceof LoaderInterface) {
+            $fixtureLocator = self::getObjectManager()->get(FixtureLocatorInterface::class, null, $fixturePaths);
+            $this->loader = self::getObjectManager()->get(LoaderInterface::class, $fixtureLocator);
+        }
+        return $this->loader;
+    }
+
     /**
      * Executes the current command.
      *
      * @param InputInterface $input An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
-     *
-     * @return mixed
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -85,15 +94,17 @@ final class LoadFixturesConsoleCommand extends Command
                 '<question>Careful, database will be purged. Do you want to continue y/N ?</question>',
                 false
             )) {
-            return 0;
+            return;
         }
 
         // Ensure the _cli_ user is authenticated
         Bootstrap::initializeBackendAuthentication();
 
         $extensions = $input->getOption('extensions');
+        $fixturePaths = $input->getOption('fixture-paths') ?? null;
         $append = $input->getOption('append');
 
+        $this->initializeLoader($fixturePaths);
         $this->loader->load($extensions, $append);
     }
 
